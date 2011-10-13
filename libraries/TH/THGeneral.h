@@ -28,6 +28,12 @@
 
 #define THInf DBL_MAX
 
+#ifdef _WIN32
+#define snprintf _snprintf
+#define popen _popen
+#define pclose _pclose
+#endif
+
 #if !defined(inline)
 # define inline
 #endif
