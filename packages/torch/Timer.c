@@ -2,14 +2,11 @@
 
 #ifdef _WIN32
 #include <time.h>
+#include <windows.h>
 #else
 #include <sys/time.h>
 #include <sys/resource.h>
 #endif
-
-#ifdef _WIN32
-static time_t base_time = 0;
-#endif    
 
 static const void* torch_Timer_id = NULL;
 
@@ -29,32 +26,50 @@ typedef struct _Timer
 
 static double torch_Timer_realtime()
 {
+#ifdef _WIN32
+  return (double)clock() / CLOCKS_PER_SEC;
+#else
   struct timeval current;
   gettimeofday(&current, NULL);
   return (current.tv_sec + current.tv_usec/1000000.0);
+#endif
 }
 
 static double torch_Timer_usertime()
 {
+#ifdef _WIN32
+  FILETIME lpCreationTime, lpExitTime, lpKernelTime, lpUserTime;
+  GetProcessTimes(GetCurrentProcess(), &lpCreationTime, &lpExitTime, &lpKernelTime, &lpUserTime);
+  ULARGE_INTEGER t;
+  t.HighPart = lpUserTime.dwHighDateTime;
+  t.LowPart = lpUserTime.dwLowDateTime;
+  return t.QuadPart / 10000000.0;
+#else
   struct rusage current;
   getrusage(RUSAGE_SELF, &current);
   return (current.ru_utime.tv_sec + current.ru_utime.tv_usec/1000000.0);
+#endif
 }
 
 static double torch_Timer_systime()
 {
+#ifdef _WIN32
+  FILETIME lpCreationTime, lpExitTime, lpKernelTime, lpUserTime;
+  GetProcessTimes(GetCurrentProcess(), &lpCreationTime, &lpExitTime, &lpKernelTime, &lpUserTime);
+  ULARGE_INTEGER t;
+  t.HighPart = lpKernelTime.dwHighDateTime;
+  t.LowPart = lpKernelTime.dwLowDateTime;
+  return t.QuadPart / 10000000.0;
+#else
   struct rusage current;
   getrusage(RUSAGE_SELF, &current);
   return (current.ru_stime.tv_sec + current.ru_stime.tv_usec/1000000.0);
+#endif
 }
 
 static int torch_Timer_new(lua_State *L)
 {
   Timer *timer = luaT_alloc(L, sizeof(Timer));
-#ifdef _WIN32
-  while(!base_time)
-    time(&base_time);
-#endif
   timer->isRunning = 1;
   timer->totalrealtime = 0;
   timer->totalusertime = 0;
