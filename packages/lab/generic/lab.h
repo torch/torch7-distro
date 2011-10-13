@@ -1,5 +1,5 @@
 #ifndef TH_GENERIC_FILE
-#define TH_GENERIC_FILE "generic/lab.c"
+#define TH_GENERIC_FILE "generic/lab.h"
 #else
 
 static int lab_(numel)(lua_State *L)

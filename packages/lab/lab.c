@@ -21,7 +21,7 @@ static const void* torch_LongStorage_id;
 
 static const void* lab_default_tensor_id;
 
-#include "generic/lab.c"
+#include "generic/lab.h"
 #include "THGenerateAllTypes.h"
 
 static int lab_setdefaulttensortype(lua_State *L)

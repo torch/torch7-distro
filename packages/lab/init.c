@@ -1,15 +1,7 @@
 #include "luaT.h"
-
-extern void lab_Byteinit(lua_State *L);
-extern void lab_Charinit(lua_State *L);
-extern void lab_Shortinit(lua_State *L);
-extern void lab_Intinit(lua_State *L);
-extern void lab_Longinit(lua_State *L);
-extern void lab_Floatinit(lua_State *L);
-extern void lab_Doubleinit(lua_State *L);
+#include "lab.h"
 
 extern void lab_utils_init(lua_State *L);
-
 
 DLL_EXPORT int luaopen_liblab(lua_State *L)
 {
