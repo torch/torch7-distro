@@ -13,7 +13,7 @@
 #endif
 
 
-#ifdef _MSC_VER
+#ifdef _WIN32
 # define DLL_EXPORT __declspec(dllexport)
 # define DLL_IMPORT __declspec(dllimport)
 # ifdef luaT_EXPORTS

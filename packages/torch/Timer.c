@@ -1,13 +1,13 @@
 #include "general.h"
 
-#ifdef _MSC_VER
+#ifdef _WIN32
 #include <time.h>
 #else
 #include <sys/time.h>
 #include <sys/resource.h>
 #endif
 
-#ifdef _MSC_VER
+#ifdef _WIN32
 static time_t base_time = 0;
 #endif    
 
@@ -51,7 +51,7 @@ static double torch_Timer_systime()
 static int torch_Timer_new(lua_State *L)
 {
   Timer *timer = luaT_alloc(L, sizeof(Timer));
-#ifdef _MSC_VER
+#ifdef _WIN32
   while(!base_time)
     time(&base_time);
 #endif

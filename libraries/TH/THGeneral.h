@@ -16,7 +16,7 @@
 # define TH_EXTERNC extern
 #endif
 
-#ifdef WIN32
+#ifdef _WIN32
 # ifdef TH_EXPORTS
 #  define TH_API TH_EXTERNC __declspec(dllexport)
 # else
@@ -36,7 +36,7 @@
 # define M_PI 3.14159265358979323846
 #endif
 
-#ifdef _MSC_VER
+#ifdef _WIN32
 TH_API double log1p(const double x);
 #endif
 
