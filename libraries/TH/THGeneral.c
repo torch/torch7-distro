@@ -100,7 +100,7 @@ void THFree(void *ptr)
   free(ptr);
 }
 
-#ifdef _MSC_VER
+#ifdef _WIN32
 double log1p(const double x)
 {
   volatile double y;

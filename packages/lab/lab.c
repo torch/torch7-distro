@@ -2,7 +2,11 @@
 #include "luaT.h"
 #include "utils.h"
 
-#include "sys/time.h"
+#ifdef _WIN32
+#include <time.h>
+#else
+#include <sys/time.h>
+#endif
 
 #define torch_(NAME) TH_CONCAT_3(torch_, Real, NAME)
 #define torch_string_(NAME) TH_CONCAT_STRING_3(torch., Real, NAME)
@@ -21,7 +25,7 @@ static const void* torch_LongStorage_id;
 
 static const void* lab_default_tensor_id;
 
-#include "generic/lab.c"
+#include "generic/lab.h"
 #include "THGenerateAllTypes.h"
 
 static int lab_setdefaulttensortype(lua_State *L)
@@ -46,19 +50,29 @@ static int lab_getdefaulttensortype(lua_State *L)
 
 static int lab_tic(lua_State* L)
 {
+  double ttime;
+#ifdef _WIN32
+  ttime = (double)clock() / CLOCKS_PER_SEC;
+#else
   struct timeval tv;
   gettimeofday(&tv,NULL);
-  double ttime = (double)tv.tv_sec + (double)(tv.tv_usec)/1000000.0;
+  ttime = (double)tv.tv_sec + (double)(tv.tv_usec)/1000000.0;
+#endif
   lua_pushnumber(L,ttime);
   return 1;
 }
 
 static int lab_toc(lua_State* L)
 {
+  lua_Number tictime = luaL_checknumber(L,1);
+  double toctime;
+#ifdef _WIN32
+  toctime = (double)clock() / CLOCKS_PER_SEC;
+#else
   struct timeval tv;
   gettimeofday(&tv,NULL);
-  double toctime = (double)tv.tv_sec + (double)(tv.tv_usec)/1000000.0;
-  lua_Number tictime = luaL_checknumber(L,1);
+  toctime = (double)tv.tv_sec + (double)(tv.tv_usec)/1000000.0;
+#endif
   lua_pushnumber(L,toctime-tictime);
   return 1;
 }
