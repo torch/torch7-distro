@@ -16,12 +16,12 @@ ENDIF(HTML_DOC)
 
 ADD_CUSTOM_TARGET(hlp-help
   ALL
-  COMMENT "Built .hlp help")
+  COMMENT "Built .hlp help" VERBATIM)
 
 IF(HTML_DOC)
   ADD_CUSTOM_TARGET(html-help
     ALL
-    COMMENT "Built .html help")
+    COMMENT "Built .html help" VERBATIM)
   ADD_DEPENDENCIES(html-help hlp-help)
 ENDIF(HTML_DOC)
 
@@ -39,7 +39,7 @@ MACRO(ADD_TORCH_HELP_FILE hlpfile hlpdstdir htmldstdir upindexhtml)
   # copy .hlp files
   ADD_CUSTOM_COMMAND(OUTPUT "${hlpdstdir}/${_file_}.hlp"
     COMMAND ${CMAKE_COMMAND} ARGS "-E" "copy" "${hlpfile}" "${hlpdstdir}/${_file_}.hlp"
-    DEPENDS "${hlpfile}")
+    DEPENDS "${hlpfile}" VERBATIM)
   SET(generatedhlpfiles ${generatedhlpfiles} "${hlpdstdir}/${_file_}.hlp")
 
   IF(HTML_DOC)  
@@ -47,19 +47,19 @@ MACRO(ADD_TORCH_HELP_FILE hlpfile hlpdstdir htmldstdir upindexhtml)
     ADD_CUSTOM_COMMAND(OUTPUT "${htmldstdir}/${_file_}.html"
       COMMAND ${LUA_EXECUTABLE}
       ARGS "${Torch_HLP2HTML_LUA}" "${hlpdstdir}/${_file_}.hlp" "${DOC_TEMPLATE}" \"<a href=\\\"${upindexhtml}\\\">Torch Manual</a>\" "${htmldstdir}" "${_file__}.hlp" "${Torch_SOURCE_DIR}/scripts/docfilters.lua"
-      DEPENDS "${LUA_EXECUTABLE}" "${hlpdstdir}/${_file_}.hlp" "${DOC_TEMPLATE}")
+      DEPENDS "${LUA_EXECUTABLE}" "${hlpdstdir}/${_file_}.hlp" "${DOC_TEMPLATE}" VERBATIM)
     SET(generatedhtmlfiles ${generatedhtmlfiles} "${htmldstdir}/${_file_}.html")
     
     # copy CSS file
     ADD_CUSTOM_COMMAND(OUTPUT "${htmldstdir}/doctorch.css"
       COMMAND ${CMAKE_COMMAND} ARGS "-E" "copy" "${Torch_SOURCE_DIR}/scripts/doctorch.css" "${htmldstdir}/doctorch.css"
-      DEPENDS "${Torch_SOURCE_DIR}/scripts/doctorch.css")
+      DEPENDS "${Torch_SOURCE_DIR}/scripts/doctorch.css" VERBATIM)
     SET(generatedhlpfiles ${generatedhlpfiles} "${htmldstdir}/doctorch.css")
     
     # copy Torch logo file
     ADD_CUSTOM_COMMAND(OUTPUT "${htmldstdir}/torchlogo.png"
       COMMAND ${CMAKE_COMMAND} ARGS "-E" "copy" "${Torch_SOURCE_DIR}/scripts/torchlogo.png" "${htmldstdir}/torchlogo.png"
-      DEPENDS "${Torch_SOURCE_DIR}/scripts/torchlogo.png")
+      DEPENDS "${Torch_SOURCE_DIR}/scripts/torchlogo.png" VERBATIM)
     SET(generatedhlpfiles ${generatedhlpfiles} "${htmldstdir}/torchlogo.png")
   ENDIF(HTML_DOC)
 
@@ -91,12 +91,12 @@ MACRO(ADD_TORCH_HELP package)
   ENDIF(${package} STREQUAL "help")
 
   ADD_CUSTOM_TARGET(${package}-hlp-files
-    DEPENDS ${generatedhlpfiles})
+    DEPENDS ${generatedhlpfiles} VERBATIM)
   ADD_DEPENDENCIES(hlp-help ${package}-hlp-files)
 
   IF(HTML_DOC)
     ADD_CUSTOM_TARGET(${package}-html-files
-      DEPENDS ${generatedhtmlfiles})
+      DEPENDS ${generatedhtmlfiles} VERBATIM)
     ADD_DEPENDENCIES(html-help ${package}-html-files)
   ENDIF(HTML_DOC)
 
@@ -106,12 +106,12 @@ MACRO(ADD_TORCH_HELP package)
 
     ADD_CUSTOM_TARGET(${package}-hlp-index
       ${LUA_EXECUTABLE} "${Torch_SOURCE_DIR}/scripts/buildMainHelpIndex.lua" "${Torch_SOURCE_DIR}/packages/help/main/index.hlp" "${Torch_BINARY_DIR}/hlp/index.hlp" "${Torch_BINARY_DIR}/hlpsections.txt" "${package}" "${CMAKE_CURRENT_SOURCE_DIR}/help/index.hlp" "${package}/index.hlp" "${ARGN}"
-      DEPENDS ${LUA_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/help/index.hlp" "${Torch_SOURCE_DIR}/packages/help/main/index.hlp")
+      DEPENDS ${LUA_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/help/index.hlp" "${Torch_SOURCE_DIR}/packages/help/main/index.hlp" VERBATIM)
 
     IF(HTML_DOC)
       ADD_CUSTOM_TARGET(${package}-html-index
         ${LUA_EXECUTABLE} "${Torch_HLP2HTML_LUA}" "${Torch_BINARY_DIR}/hlp/index.hlp" "${DOC_TEMPLATE}" \"\" "${Torch_BINARY_DIR}/html" "${Torch_BINARY_DIR}/hlp/index.hlp" "${Torch_SOURCE_DIR}/scripts/docfilters.lua"
-        DEPENDS "${LUA_EXECUTABLE}" "${DOC_TEMPLATE}")
+        DEPENDS "${LUA_EXECUTABLE}" "${DOC_TEMPLATE}" VERBATIM)
       
       ADD_DEPENDENCIES(${package}-html-index ${package}-hlp-index)
       ADD_DEPENDENCIES(${package}-html-files ${package}-html-index)
