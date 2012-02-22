@@ -75,7 +75,32 @@ function Linear:accGradParameters(input, gradOutput, scale)
       self.gradWeight:addmm(scale, gradOutput:t(), input)
       self.gradBias:addmv(scale, gradOutput:t(), input.new(nframe):fill(1))
    end
+end
 
+function Linear:fromParameters(params, offset)
+	local allParams = self:parameters()
+	local weight = allParams[1]
+	local bias = allParams[2]
+	
+	-- create a new module that looks like this one
+	local newModule = self:clone()
+	
+	-- create a new Tensor for weight matrix of the same size
+	local weight = torch.Tensor(weight:size())
+	
+	-- use the params as its storage
+	weight:set(params:storage(), offset, weight:nElement())
+	
+	-- and copy the values to our current weight matrix
+	newModule.weight:copy(weight)
+	
+	-- do the same thing for the bias
+	local bias = torch.Tensor(bias:size())
+	bias:set(params:storage(), offset + weight:nElement(), bias:nElement())
+	newModule.bias:copy(bias)
+	
+	local inc = (weight:nElement() + bias:nElement())
+	return newModule, inc
 end
 
 -- we do not need to accumulate parameters when sharing

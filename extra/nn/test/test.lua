@@ -1013,6 +1013,24 @@ function nntest.VolumetricConvolution()
    mytester:asserteq(0, berr, torch.typename(module) .. ' - i/o backward err ')
 end
 
+function nntest.DerivativeCheck()
+	local epsilon = 0.0001
+	local encodingSize = 5
+	local input = torch.rand(2*encodingSize)
+	local output = input
+	
+	-- create autoencoder
+	local seq = nn.Sequential()
+	local loss = nn.MSECriterion()
+	seq:add(nn.Linear(2*encodingSize, encodingSize))
+	seq:add(nn.Tanh())
+	seq:add(nn.Linear(encodingSize, 2*encodingSize))
+	seq:add(nn.Tanh())	
+		
+	local check = seq:derivativeCheck(input, input, loss, epsilon)	
+	mytester:assertgt(epsilon, torch.mean(check), 'error with derivative check')
+end
+
 
 mytester:add(nntest)
 --mytester:add(test_SpatialConvolution)
