@@ -117,6 +117,75 @@ function Sequential:parameters()
    return w,gw
 end
 
+function Sequential:getParameters()
+	local outputParams = {}
+	local outputGrad = {}
+	
+	for i, module in ipairs(self.modules) do
+		if module:parameters() then
+			local flattenedParams, flattenedGrad = module:getParameters()
+			for i=1,flattenedParams:size(1) do
+				table.insert(outputParams, flattenedParams[i])
+				table.insert(outputGrad, flattenedGrad[i])
+			end
+		end
+	end
+	
+	return torch.Tensor.new(outputParams), torch.Tensor.new(outputGrad)
+end
+
+function Sequential:fromParameters(params)
+	local new = nn.Sequential()	
+	local newParams = params:clone()
+	local offset=1
+	
+	for _, module in ipairs(self.modules) do
+		if module:parameters() then
+			local newModule, inc = module:fromParameters(newParams, offset)
+			new:add(newModule)
+			offset = offset + inc
+		else
+			new:add(module:clone())
+		end
+	end
+	
+	return new
+end
+
+function Sequential:derivativeCheck(input, output, criterion, epsilon)
+	-- first generate the gradients
+	criterion:forward(self:forward(input), output)
+	self:zeroGradParameters()
+	self:backward(input, criterion:backward(self.output, output))	
+	
+	-- unroll the model's parameters and resulting gradients
+	local theta, grad = self:getParameters()	
+	local results = torch.Tensor(grad:size(1))
+	
+	-- go through each variable and perturb it +/- epsilon
+	for i=1,grad:size(1) do
+		-- plus
+		local thetap = theta:clone()
+		thetap[i] = thetap[i] + epsilon
+		local seqp = self:fromParameters(thetap)
+		local Jplus = criterion:forward(seqp:forward(input), output)
+
+		-- minus
+		local thetam = theta:clone()
+		thetam[i] = thetam[i] - epsilon
+		local seqm = self:fromParameters(thetam)
+		local Jminus = criterion:forward(seqm:forward(input), output)
+
+		-- the definition of a derivative
+		local J = (Jplus - Jminus)/(2*epsilon)
+		
+		-- measure the difference from analytical and estimated gradients
+		results[i] = math.abs(grad[i] - J)
+	end
+	
+	return results
+end
+
 function Sequential:__tostring__()
    local tab = '  '
    local line = '\n'
