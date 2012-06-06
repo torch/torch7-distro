@@ -1171,21 +1171,25 @@ void THTensor_(histc)(THTensor *hist, THTensor *tensor, long nbins, real minvalu
   }
   real bins = (real)(nbins)-1e-6;
 
+  // make sure input is contiguous
+  tensor = THTensor_(newContiguous)(tensor);
+  real *tensorp = THTensor_(data)(tensor);
+
   THTensor *clone = THTensor_(newWithSize1d)(THTensor_(nElement)(tensor));
-  THTensor_(copy)(clone,tensor);
-  THTensor_(add)(clone, clone, -minval);
-  THTensor_(div)(clone, clone, (maxval-minval));
-  THTensor_(mul)(clone, clone, bins);
-  THTensor_(floor)(clone, clone);
-  THTensor_(add)(clone, clone, 1);
+  real *clonep = THTensor_(data)(clone);
+  long ne = THTensor_(nElement)(clone);
+
+   // (2 rather than 5 op) histogram code
+  THVector_(fill)(clonep,-minval,ne);
+  THVector_(add)(clonep,tensorp,bins/maxval,ne);
 
   real *h_data = THTensor_(data)(hist);
 
-  TH_TENSOR_APPLY(real, clone,                                         \
-                  if ((*clone_data <= nbins) && (*clone_data >= 1)) {  \
-                    *(h_data + (int)(*clone_data) - 1) += 1;           \
-                  });
+  TH_TENSOR_APPLY(real, clone,*(h_data + (int)floor(*clone_data)) += 1;);
+  
+  // cleanup
   THTensor_(free)(clone);
+  THTensor_(free)(tensor);
 }
 
 #endif /* floating point only part */
