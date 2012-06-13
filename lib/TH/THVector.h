@@ -6,7 +6,7 @@
 #define THVector_(NAME) TH_CONCAT_4(TH,Real,Vector_,NAME)
 
 #if defined USE_SSE2 || defined USE_SSE3 || defined USE_SSSE3 \
-  || defined USE_SSE4_1 || defined USE_SSE4_2
+  || defined USE_SSE4_1 || defined USE_SSE4_2 || defined USE_AVX
 
 #ifdef USE_SSE2
 #include <emmintrin.h>
@@ -22,6 +22,10 @@
 
 #if defined (USE_SSE4_2) || defined (USE_SSE4_1)
 #include <smmintrin.h>
+#endif
+
+#if defined (USE_AVX)
+#include <immintrin.h>
 #endif
 
 #define THDoubleVector_fill(x, c, n) {          \
@@ -55,6 +59,33 @@
       y[i] += c * x[i];                         \
     }                                           \
   }
+
+#define THDoubleVector_add_unrolled(y, x, c, n) {       \
+        long i = 0;                             \
+        __m128d XMM7 = _mm_set1_pd(c);          \
+        __m128d XMM0,XMM1,XMM2;                 \
+        __m128d XMM3,XMM4,XMM5;                 \
+        for (; i<=((n)-6); i+=6) {              \
+            XMM0 = _mm_loadu_pd((x)+i);         \
+            XMM1 = _mm_loadu_pd((x)+i+2);       \
+            XMM2 = _mm_loadu_pd((x)+i+4);       \
+            XMM3 = _mm_loadu_pd((y)+i);         \
+            XMM4 = _mm_loadu_pd((y)+i+2);       \
+            XMM5 = _mm_loadu_pd((y)+i+4);       \
+            XMM0 = _mm_mul_pd(XMM0, XMM7);      \
+            XMM1 = _mm_mul_pd(XMM1, XMM7);      \
+            XMM2 = _mm_mul_pd(XMM2, XMM7);      \
+            XMM3 = _mm_add_pd(XMM3, XMM0);      \
+            XMM4 = _mm_add_pd(XMM4, XMM1);      \
+            XMM5 = _mm_add_pd(XMM5, XMM2);      \
+            _mm_storeu_pd((y)+i  , XMM3);       \
+            _mm_storeu_pd((y)+i+2, XMM4);       \
+            _mm_storeu_pd((y)+i+4, XMM5);       \
+        }                                       \
+        for (; i<(n); i++) {                    \
+            y[i] += c * x[i];                   \
+        }                                       \
+    }
 
 #define THDoubleVector_diff(z, x, y, n) {       \
     long i;                                     \
@@ -125,6 +156,20 @@
     }                                           \
   }
 
+#if !defined (USE_AVX)
+
+#define THDoubleVector_conv1d(y, x, c, a, n, cn, reverse){         \
+   int i;                                                          \
+   if (reverse==0)                                                      \
+       for(i = 0; i < cn; i++)                                          \
+           THDoubleVector_add_unrolled(y, x + i, c[i]*a, n);            \
+   else                                                                 \
+       for(i = 0; i < cn; i++)                                          \
+           THDoubleVector_add_unrolled(y, x + i, c[-i]*a, n);           \
+    }
+
+#endif
+
 #define THFloatVector_fill(x, c, n) {           \
     long i;                                     \
     __m128 XMM0 = _mm_set_ps1(c);               \
@@ -155,6 +200,33 @@
       y[i] += c * x[i];                         \
     }                                           \
   }
+
+#define THFloatVector_add_unrolled(y, x, c, n) {        \
+        long i = 0;                             \
+        __m128 XMM7 = _mm_set_ps1(c);           \
+        __m128 XMM0,XMM1,XMM2;                  \
+        __m128 XMM3,XMM4,XMM5;                  \
+        for (; i<=((n)-12); i+=12) {            \
+            XMM0 = _mm_loadu_ps((x)+i);         \
+            XMM1 = _mm_loadu_ps((x)+i+4);       \
+            XMM2 = _mm_loadu_ps((x)+i+8);       \
+            XMM3 = _mm_loadu_ps((y)+i);         \
+            XMM4 = _mm_loadu_ps((y)+i+4);       \
+            XMM5 = _mm_loadu_ps((y)+i+8);       \
+            XMM0 = _mm_mul_ps(XMM0, XMM7);      \
+            XMM1 = _mm_mul_ps(XMM1, XMM7);      \
+            XMM2 = _mm_mul_ps(XMM2, XMM7);      \
+            XMM3 = _mm_add_ps(XMM3, XMM0);      \
+            XMM4 = _mm_add_ps(XMM4, XMM1);      \
+            XMM5 = _mm_add_ps(XMM5, XMM2);      \
+            _mm_storeu_ps((y)+i  , XMM3);       \
+            _mm_storeu_ps((y)+i+4, XMM4);       \
+            _mm_storeu_ps((y)+i+8, XMM5);       \
+        }                                       \
+        for (; i<(n); i++) {                    \
+            y[i] += c * x[i];                   \
+        }                                       \
+    }
 
 #define THFloatVector_diff(z, x, y, n) {        \
     long i;                                     \
@@ -224,6 +296,24 @@
       y[off+i] *= x[off+i];                     \
     }                                           \
   }
+
+#if !defined (USE_AVX)
+
+#define THFloatVector_conv1d(y, x, c, a, n, cn, reverse){          \
+   int i;                                                          \
+   if (reverse==0)                                                      \
+       for(i = 0; i < cn; i++)                                          \
+           THFloatVector_add_unrolled(y, x + i, c[i]*a, n);             \
+   else                                                                 \
+       for(i = 0; i < cn; i++)                                          \
+           THFloatVector_add_unrolled(y, x + i, c[-i]*a, n);            \
+    }
+
+#endif
+
+#if defined (USE_AVX)
+#include "THVector_AVX.h"
+#endif
 
 #elif defined __NEON__
 // ARM NEON Assembly routine for operating on floats
