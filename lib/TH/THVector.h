@@ -159,7 +159,7 @@
 #if !defined (USE_AVX)
 
 #define THDoubleVector_conv1d(y, x, c, a, n, cn, reverse){         \
-   int i;                                                          \
+   long i;                                                          \
    if (reverse==0)                                                      \
        for(i = 0; i < cn; i++)                                          \
            THDoubleVector_add_unrolled(y, x + i, c[i]*a, n);            \
@@ -300,7 +300,7 @@
 #if !defined (USE_AVX)
 
 #define THFloatVector_conv1d(y, x, c, a, n, cn, reverse){          \
-   int i;                                                          \
+   long i;                                                          \
    if (reverse==0)                                                      \
        for(i = 0; i < cn; i++)                                          \
            THFloatVector_add_unrolled(y, x + i, c[i]*a, n);             \
@@ -646,6 +646,15 @@ static inline void THDoubleVector_mul(double *y, const double *x, const long n)
     y[i] *= x[i];
 }
 
+static inline THDoubleVector_conv1d(double *y, double *x, double *c, double a, const long n, const long cn, unsigned char reverse){
+    long i;
+    if (reverse==0)
+        for(i = 0; i < cn; i++)
+            THDoubleVector_add(y, x + i, c[i]*a, n);
+    else
+        for(i = 0; i < cn; i++)
+            THDoubleVector_add(y, x + i, c[-i]*a, n);
+}
 
 #else
 
