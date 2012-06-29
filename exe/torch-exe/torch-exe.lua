@@ -71,7 +71,10 @@ if interactive then
 end
 
 -- re-pack arguments
-args = table.concat(arg, ' ')
+for i,arg_i in ipairs(arg) do
+   arg[i] = arg_i:gsub('"','\\"')
+end
+args = '"' .. table.concat(arg, '" "') .. '"'
 
 -- test qlua existence
 if lua == 'torch-qlua' and not paths.filep(paths.concat(paths.install_bin,lua)) then
