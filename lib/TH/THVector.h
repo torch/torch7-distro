@@ -159,14 +159,19 @@
 #if !defined (USE_AVX)
 
 #define THDoubleVector_conv1d(y, x, c, a, n, cn, reverse){          \
-    long i;                                                         \
-    if (reverse==0)                                                 \
-        for(i = 0; i < cn; i++)                                     \
-            THDoubleVector_add_unrolled(y, x + i, c[i]*a, n);       \
-    else                                                            \
-        for(i = 0; i < cn; i++)                                     \
-            THDoubleVector_add_unrolled(y, x + i, c[-i]*a, n);      \
-    }
+  long i;                                                           \
+  double *xptr = x;                                                 \
+  if (reverse==0)                                                   \
+    for(i = 0; i < cn; i++){                                        \
+      THDoubleVector_add_unrolled(y, xptr, c[i]*(a), n);            \
+      xptr++;                                                       \
+    }                                                               \
+  else                                                              \
+    for(i = 0; i < cn; i++){                                        \
+      THDoubleVector_add_unrolled(y, xptr, c[-i]*(a), n);           \
+      xptr++;                                                       \
+    }                                                               \
+  }
 
 #endif
 
@@ -299,15 +304,20 @@
 
 #if !defined (USE_AVX)
 
-#define THFloatVector_conv1d(y, x, c, a, n, cn, reverse){          \
-   long i;                                                          \
-   if (reverse==0)                                                      \
-       for(i = 0; i < cn; i++)                                          \
-           THFloatVector_add_unrolled(y, x + i, c[i]*a, n);             \
-   else                                                                 \
-       for(i = 0; i < cn; i++)                                          \
-           THFloatVector_add_unrolled(y, x + i, c[-i]*a, n);            \
-    }
+#define THFloatVector_conv1d(y, x, c, a, n, cn, reverse){       \
+    long i;                                                     \
+    float *xptr = x;                                            \
+    if (reverse==0)                                             \
+      for(i = 0; i < cn; i++){                                  \
+        THFloatVector_add_unrolled(y, xptr, c[i]*a, n);         \
+        xptr++;                                                 \
+      }                                                         \
+    else                                                        \
+      for(i = 0; i < cn; i++){                                  \
+        THFloatVector_add_unrolled(y, xptr, c[-i]*a, n);        \
+        xptr++;                                                 \
+      }                                                         \
+  }
 
 #endif
 

@@ -1,3 +1,6 @@
+#ifndef TH_VECTOR_AVX_INC
+#define TH_VECTOR_AVX_INC
+
 
 void THFloatVector_conv1dk3(float * y, float * x, float * c, float alpha, unsigned int n, char reverse){
     int i, j;
@@ -3716,3 +3719,5 @@ void THDoubleVector_conv1dk16(double * y, double * x, double * c, double alpha, 
                 cptr -= cnslice;}                                       \
         }                                                               \
     }
+
+#endif
