@@ -1,17 +1,17 @@
 static int cunn_SpatialConvolutionMap_updateOutput(lua_State *L)
 {
   THCudaTensor *input = (THCudaTensor*)
-    luaT_checkudata(L, 2, torch_CudaTensor_id);
+    luaT_checkudata(L, 2, "torch.CudaTensor");
   int dW = luaT_getfieldcheckint(L, 1, "dW");
   int dH = luaT_getfieldcheckint(L, 1, "dH");
   THCudaTensor *weight = (THCudaTensor*)
-    luaT_getfieldcheckudata(L, 1, "weight", torch_CudaTensor_id);
+    luaT_getfieldcheckudata(L, 1, "weight", "torch.CudaTensor");
   THCudaTensor *bias = (THCudaTensor*)
-    luaT_getfieldcheckudata(L, 1, "bias", torch_CudaTensor_id);
+    luaT_getfieldcheckudata(L, 1, "bias", "torch.CudaTensor");
   THCudaTensor *output = (THCudaTensor*)
-    luaT_getfieldcheckudata(L, 1, "output", torch_CudaTensor_id);
+    luaT_getfieldcheckudata(L, 1, "output", "torch.CudaTensor");
   THCudaTensor *connTableRev = (THCudaTensor*)
-    luaT_getfieldcheckudata(L, 1, "connTableRev", torch_CudaTensor_id);
+    luaT_getfieldcheckudata(L, 1, "connTableRev", "torch.CudaTensor");
   luaL_argcheck(L, connTableRev->nDimension == 3, 2, 
                 "Reverse table not generated (is table fixed fanin?)");
   luaL_argcheck(L, input->nDimension == 3, 2, "3D tensor is expected");
@@ -51,7 +51,7 @@ static const struct luaL_Reg cunn_SpatialConvolutionMap__ [] = {
 
 static void cunn_SpatialConvolutionMap_init(lua_State *L)
 {
-  luaT_pushmetaclass(L, torch_CudaTensor_id);
+  luaT_pushmetatable(L, "torch.CudaTensor");
   luaT_registeratname(L, cunn_SpatialConvolutionMap__, "nn");
   lua_pop(L,1);
 }
