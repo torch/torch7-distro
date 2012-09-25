@@ -35,7 +35,7 @@ TH_API void THTensor_(validXCorr2Dptr)(real *r_,
         *r_++ += alpha*sum;
       }
     }
-  } else if (kc < 3 || oc < 48){
+  } else if (kc < 3 || oc < 32){
       for(yy = 0; yy < or; yy++) {
           real *pi_ = t_ + yy*sr*ic;
           real *pw_ = k_;
@@ -98,7 +98,7 @@ TH_API void THTensor_(validConv2Dptr)(real *r_,
         *r_++ += alpha*sum;
       }
     }
-  } else if (kc < 3 || oc < 48){
+  } else if (kc < 3 || oc < 32){
       for(yy = 0; yy < or; yy++) {
       real *pw_ = k_ + kr*kc - 1;
       real *pi_ = t_ + yy*sr*ic;
