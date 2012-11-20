@@ -222,3 +222,17 @@ pkg.fftw = {
    dependencies = {},
    commit = 'master',
 }
+
+pkg.torchffi = {
+   git = 'https://github.com/clementfarabet/torchffi',
+   description = 'Enables FFI bindings for Torch (requires LuaJIT)',
+   dependencies = {},
+   commit = 'master'
+}
+
+pkg.md5 = {
+   git = 'https://github.com/andresy/lua---md5',
+   description = 'MD5sum for luajit',
+   dependencies = {},
+   commit = 'master',
+}
