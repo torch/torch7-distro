@@ -599,16 +599,19 @@
                 csize = 16;                                             \
             if(reverse){                                                \
                 argptr[3] = ctmp;                                       \
+                for(j = 0; j < csize; j++){                             \
+                  ctmp[j] = c[-j-i];                                    \
+                }                                                       \
             }                                                           \
             else                                                        \
                 argptr[3] = (c) + i;                                    \
             argptr[2] = x + i;                                          \
             Xsize = (n + csize - 1);                                    \
-            if(Xsize & 31 && Xsize >=16){                               \
+            if(Xsize >=16){                                             \
                 memcpy(xtmp, &argptr[2][(Xsize & 0xfffffff0) - 16], sizeof(float) * ((Xsize & 31) + 16)); \
             }                                                           \
-            else if(Xsize & 31){                                        \
-                memcpy(xtmp, &argptr[2][0], sizeof(float) * 48);        \
+            else {                                                      \
+                memcpy(xtmp, &argptr[2][0], sizeof(float) * Xsize);        \
             }                                                           \
             __asm__ __volatile__ (                                      \
                 "@push        {r0, r1, r2, r3, r4, r5, r6, r7, r8, r9, r10, r11, r12} @ \n\t" \
