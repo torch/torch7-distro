@@ -7,7 +7,7 @@ source = {
 }
 
 description = {
-  summary = "Torch HEAD commit",
+  summary = "Torch 7 master branch",
   detailed = [[
 Torch7 provides a Matlab-like environment for state-of-the-art machine
 learning algorithms. 
