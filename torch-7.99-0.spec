@@ -1,19 +1,20 @@
 package = "torch"
-version = "7.0.1-99"
+version = "7.99-0"
 
 source = {
   url = "git://github.com/jucor/torch.git",
-  branch = 'luarocks'
+  branch = 'master'
 }
 
 description = {
-  summary = "Torch",
+  summary = "Torch HEAD commit",
   detailed = [[
 Torch7 provides a Matlab-like environment for state-of-the-art machine
 learning algorithms. 
 It is easy to use and provides a very efficient implementation, thanks 
 to an easy and fast scripting language (Lua) and a underlying C 
 implementation.
+   This rockspec installs the master branch from the git repository.
   ]],
   homepage = "http://www.torch.ch",
   license = "BSD"
