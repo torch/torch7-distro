@@ -661,6 +661,7 @@ static int torch_Tensor_(__index__)(lua_State *L)
   THTensor *tensor = luaT_checkudata(L, 1, torch_Tensor);
   THLongStorage *idx = NULL;
   THByteTensor *mask;
+  THLongTensor *indices;
 
   if(lua_isnumber(L, 2))
   {
@@ -767,6 +768,14 @@ static int torch_Tensor_(__index__)(lua_State *L)
   {
     THTensor *vals = THTensor_(new)();
     THTensor_(maskedSelect)(vals, tensor, mask);
+    luaT_pushudata(L, vals, torch_Tensor);
+    lua_pushboolean(L, 1);
+    return 2;
+  }
+  else if((indices = luaT_toudata(L, 2, "torch.LongTensor")))
+  {
+    THTensor *vals = THTensor_(new)();
+    THTensor_(indexedSelect)(vals, tensor, indices);
     luaT_pushudata(L, vals, torch_Tensor);
     lua_pushboolean(L, 1);
     return 2;
