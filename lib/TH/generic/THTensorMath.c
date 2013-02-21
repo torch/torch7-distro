@@ -61,6 +61,47 @@ void THTensor_(maskedSelect)(THTensor *tensor, THTensor *src, THByteTensor *mask
 		   });
 }
 
+void THTensor_(indexedSelect)(THTensor *dst, THTensor *src, THLongTensor *indices)
+{
+  THLongStorage *newSize;
+  long numel ;
+
+  THArgCheck(THLongTensor_nDimension(indices) == 1, 2, "indices should be 1 dimensional");
+
+  numel = THLongTensor_nElement(indices);
+
+  /* create output */
+  newSize  = THTensor_(newSizeOf)(src);
+
+  /* only works for first dimension, though could be extended */
+  THLongStorage_set(newSize,0,numel);
+  
+  THTensor_(resize)(dst,newSize,NULL);
+  THLongStorage_free(newSize);
+
+  src = THTensor_(newContiguous)(src);
+
+  long i,j;
+
+  long stride = src->stride[0]; 
+
+  real *dst_data  = THTensor_(data)(dst);
+  real *src_data  = THTensor_(data)(src);
+  real *src_slice;
+  long *idx_data  = THLongTensor_data(indices);
+  
+  for (i = 0; i < numel; i++){
+    src_slice = src_data + ((*idx_data - 1) * stride);
+    for (j = 0; j < stride; j++){
+      *dst_data = *src_slice;
+      dst_data++;
+      src_slice++;
+    }
+    idx_data++;
+  }
+  THTensor_(free)(src);
+}
+
 accreal THTensor_(dot)(THTensor *tensor, THTensor *src)
 {
   accreal sum = 0;
