@@ -67,6 +67,8 @@ void THTensor_(indexedSelect)(THTensor *dst, THTensor *src, THLongTensor *indice
   long numel ;
 
   THArgCheck(THLongTensor_nDimension(indices) == 1, 2, "indices should be 1 dimensional");
+  THArgCheck(THLongTensor_maxall(indices) <= src->size[0], 2, "indices out of bounds (> src:size(1))");
+  THArgCheck(THLongTensor_minall(indices) > 0, 2, "indices out of bounds (< 1)");
 
   numel = THLongTensor_nElement(indices);
 
