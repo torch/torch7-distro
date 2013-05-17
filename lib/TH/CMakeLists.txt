@@ -4,10 +4,10 @@ SET(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake ${CMAKE_MODULE_PATH})
 
 SET(hdr 
   THGeneral.h THStorage.h THTensor.h THTensorApply.h
-  THBlas.h THLapack.h THLogAdd.h THRandom.h THVector.h)
+  THBlas.h THLapack.h THLogAdd.h THRandomNumber.h THRandom.h THVector.h)
 SET(src 
   THGeneral.c THStorage.c THTensor.c THBlas.c THLapack.c
-  THLogAdd.c THRandom.c
+  THLogAdd.c THRandomNumber.c THRandom.c
   THFile.c THDiskFile.c THMemoryFile.c)
 
 SET(src ${src} ${hdr})

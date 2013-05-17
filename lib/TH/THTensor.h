@@ -16,9 +16,7 @@
 
 #include "THTensorMacros.h"
 
-/* random numbers */
-#include "generic/THTensorRandom.h"
-#include "THGenerateAllTypes.h"
+#include "THRandom.h"
 
 /* maths */
 #include "generic/THTensorMath.h"

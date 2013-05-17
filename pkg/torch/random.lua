@@ -12,9 +12,22 @@ for _,name in ipairs({"seed", "initialSeed"}) do
                   {{name="long", creturned=true}})
 end
 
+
 interface:wrap('manualSeed',
                'THRandom_manualSeed',
                {{name="long"}})
+
+interface:wrap('getRandomState',
+               'THRandom_getState',
+               {{name="LongTensor", returned=true},
+                {name="long", returned=true},
+                {name="long", returned=true}})
+
+interface:wrap('setRandomState',
+               'THRandom_setState',
+               {{name="LongTensor"},
+                {name="long"},
+                {name="long"}})
 
 interface:register("random__")
                 
