@@ -125,29 +125,19 @@ void THRandom_getState(THLongTensor* ret, long* offset, long* _left)
 {
   if(initf == 0)
     THRandom_seed();
-  /* fprintf(stderr, "Before get Storage points to %p. State is %p\n", stateStorage->data, state); */
   THLongTensor_setStorage1d(ret, stateStorage, 0, n, 1);
   *offset = (long)(next - state);
   *_left = left;
-  /* fprintf(stderr, "After get Storage points to %p. State is %p\n", stateStorage->data, state); */
 }
 
 
 void THRandom_setState(THLongTensor* src, long offset, long _left)
 {
-/*  fprintf(stderr, "Before set. src point to %p. Storage points to %p. State is %p\n",
-		  THLongTensor_data(src), stateStorage->data, state); */
-  //! \todo ensure that the state storage exists
   THArgCheck(THLongTensor_nElement(src) == n, 1, "state should have 624 elements");
-  // src = THLongTensor_newContiguous(src);
-  // if(THLongTensor_storage(src) != stateStorage)
-    memmove(state, THLongTensor_data(src), n*sizeof(long));
-  // THLongTensor_free(src);
+  memmove(state, THLongTensor_data(src), n*sizeof(long));
   next = state + offset;
   left = _left;
   initf = 1;
-  /* fprintf(stderr, "After set src points to %p. Storage points to %p. State is %p\n",
-		  THLongTensor_data(src), stateStorage->data, state); */
 }
 
 
