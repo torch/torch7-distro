@@ -125,7 +125,7 @@ void THRandom_getState(THLongTensor* ret, long* offset, long* _left)
 {
   if(initf == 0)
     THRandom_seed();
-  THLongTensor_setStorage1d(ret, stateStorage, 0, n, 1);
+  memmove(THLongTensor_data(ret), state, n*sizeof(long));
   *offset = (long)(next - state);
   *_left = left;
 }

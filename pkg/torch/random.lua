@@ -36,9 +36,9 @@ static int wrapper_getRNGState(lua_State *L)
 {
 int narg = lua_gettop(L);
 if(narg > 0)
-    luaL_error(L, "expected arguments: *LongTensor*");
+    luaL_error(L, "expected arguments: none");
 
-THLongTensor *arg1 = THLongTensor_new();
+THLongTensor *arg1 = THLongTensor_newWithSize1d(624);
 long arg2 = 0;
 long arg3 = 0;
 
