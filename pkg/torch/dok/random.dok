@@ -43,9 +43,9 @@ random numbers from the start. Example:
 
 However, the seed only allows to generate the same series of pseudo-random numbers from
 the beginning. It does not give enough information to resume at any other specific point in the series than its start.
-In order to do so, the full state of the random generator before the point of interest in the series is actually required. 
+In order to do so, the full state of the random generator before the point of interest in the series is actually required.
 
-A snapshot of the current state can be obtained using [[#torch.getRNGState()|getRNGState()]], and can be restored using [[#torch.setRNGState()|setRNGState()]]. 
+A snapshot of the current state can be obtained using [[#torch.getRNGState()|getRNGState()]], and can be restored using [[#torch.setRNGState()|setRNGState()]].
 
 Setting a  previously saved state allows the user to (re)-generate a particular series of random numbers from any point in the series. Example:
 <file>
@@ -95,10 +95,10 @@ Returns the initial seed used to initialize the random generator.
 ====  [table] getRNGState() ====
 {{anchor:torch.getRNGState}}
 
-Get the current state of the random number generator. Returns a table containing several entries 
-required by the Mersenne Twister generator. 
+Get the current state of the random number generator. Returns a table containing several entries
+required by the Mersenne Twister generator.
 
-This table and its content are clones of the current generator state, 
+This table and its content are clones of the current generator state,
 and are therefore not updated when new random numbers are generated. They are intended for use with [[#torch.setRNGState|setRNGState()]].
 It is strongly not recommended to modify them.
 
