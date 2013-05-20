@@ -5,7 +5,7 @@ Torch provides accurate mathematical random generation, based on
 [[http://www.math.sci.hiroshima-u.ac.jp/~m-mat/MT/emt.html|Mersenne Twister]]
 random number generator.
 
-=====  Seed Handling =====
+=====  Seed and State Handling =====
 {{anchor::torch.seed.dok}}
 
 If no seed is provided to the random generator (using
@@ -16,7 +16,7 @@ time a random number is generated.
 Initial seed can be obtained using [[#torch.initialSeed|initialSeed()]].
 
 Setting a particular seed allows the user to (re)-generate a particular serie of
-random numbers. Example:
+random numbers from the start. Example:
 <file>
 > torch.manualSeed(123)
 > = torch.uniform()
@@ -41,6 +41,41 @@ random numbers. Example:
 0.28613933874294
 </file>
 
+However, the seed only allows to generate the same series of pseudo-random numbers from
+the beginning. It does not give enough information to resume at any other specific point in the series than its start.
+In order to do so, the full state of the random generator before the point of interest in the series is actually required. 
+
+A snapshot of the current state can be obtained using [[#torch.getRNGState()|getRNGState()]], and can be restored using [[#torch.setRNGState()|setRNGState()]]. 
+
+Setting a  previously saved state allows the user to (re)-generate a particular series of random numbers from any point in the series. Example:
+<file>
+> torch.manualSeed(123)
+> = torch.uniform()
+0.69646918727085
+> return  torch.uniform()
+0.71295532141812
+> state = torch.getRNGState()
+> return  torch.uniform()
+0.28613933874294
+> torch.setRNGState(state)
+> return  torch.uniform()
+0.28613933874294
+> return  torch.uniform()
+0.42847092496231
+> return  torch.uniform()
+0.22685145493597
+> torch.setRNGState(state)
+> return  torch.uniform()
+0.28613933874294
+> return  torch.uniform()
+0.42847092496231
+> return  torch.uniform()
+0.22685145493597
+> torch.manualSeed(123)
+> return  torch.uniform()
+0.69646918727085
+</file>
+
 ====  [number] seed() ====
 {{anchor:torch.seed}}
 
@@ -56,6 +91,22 @@ Set the seed of the random number generator to the given ''number''.
 {{anchor:torch.initialSeed}}
 
 Returns the initial seed used to initialize the random generator.
+
+====  [table] getRNGState() ====
+{{anchor:torch.getRNGState}}
+
+Get the current state of the random number generator. Returns a table containing several entries 
+required by the Mersenne Twister generator. 
+
+This table and its content are clones of the current generator state, 
+and are therefore not updated when new random numbers are generated. They are intended for use with [[#torch.setRNGState|setRNGState()]].
+It is strongly not recommended to modify them.
+
+====  setRNGState(state) ====
+{{anchor:torch.setRNGState}}
+
+Set the state of the random number generator to a previously saved state. The state given as argument should be a table returned by
+a previous call to [[#torch.getRNGState|getRNGState()]].
 
 ====  [number] random() ====
 {{anchor:torch.random}}
