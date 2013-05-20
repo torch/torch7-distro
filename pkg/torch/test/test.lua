@@ -404,13 +404,13 @@ end
 
 function torchtest.RNGState()
    local ignored = torch.rand(1000)
-   local s, offset, left = torch.getRNGState()
-   local stateCloned = s:clone()
+   local state = torch.getRNGState()
+   local stateCloned = state[1]:clone()
    local before = torch.rand(1000)
 
-   mytester:assert(s:ne(stateCloned):long():sum() == 0, 'RNG (supposedly cloned) state has changed after random number generation')
+   mytester:assert(state[1]:ne(stateCloned):long():sum() == 0, 'RNG (supposedly cloned) state has changed after random number generation')
 
-   torch.setRNGState(stateCloned, offset, left)
+   torch.setRNGState(state)
    local after = torch.rand(1000)
    mytester:assertTensorEq(before, after, 1e-16, 'getRNGState/setRNGState not generating same sequence')
 end

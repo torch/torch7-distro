@@ -17,18 +17,11 @@ interface:wrap('manualSeed',
                'THRandom_manualSeed',
                {{name="long"}})
 
-
-interface:wrap('setRNGState',
+interface:wrap('_setRNGState',
                'THRandom_setState',
                {{name="LongTensor"},
                 {name="long"},
                 {name="long"}})
-
---[[ interface:wrap('getRNGState',
-               'THRandom_getState',
-               {{name="LongTensor", returned=true},
-                {name="long", returned=true},
-                {name="long", returned=true}}) --]]
 
 interface:print(
     [[
@@ -59,7 +52,7 @@ void torch_random_init(lua_State *L)
 {
   luaL_register(L, NULL, random__);
   static const struct luaL_reg randomExtra__ [] = {
-        {"getRNGState", wrapper_getRNGState}
+        {"_getRNGState", wrapper_getRNGState}
     };
   luaL_register(L, NULL, randomExtra__);
 }
