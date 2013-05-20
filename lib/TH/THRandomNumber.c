@@ -105,7 +105,7 @@ void THRandom_manualSeed(unsigned long the_seed_)
     THLongStorage_free(stateStorage);
   stateStorage = THLongStorage_newWithData((long *)state, n);
   THLongStorage_clearFlag(stateStorage, TH_STORAGE_FREEMEM); // don't delete underlying data
-  fprintf(stderr, "Storage points to %p. State is %p\n", stateStorage->data, state);
+  /* fprintf(stderr, "Storage points to %p. State is %p\n", stateStorage->data, state); */
   left = 1;
   initf = 1;
 }
@@ -125,18 +125,18 @@ void THRandom_getState(THLongTensor* ret, long* offset, long* _left)
 {
   if(initf == 0)
     THRandom_seed();
-  fprintf(stderr, "Before get Storage points to %p. State is %p\n", stateStorage->data, state);
+  /* fprintf(stderr, "Before get Storage points to %p. State is %p\n", stateStorage->data, state); */
   THLongTensor_setStorage1d(ret, stateStorage, 0, n, 1);
   *offset = (long)(next - state);
   *_left = left;
-  fprintf(stderr, "After get Storage points to %p. State is %p\n", stateStorage->data, state);
+  /* fprintf(stderr, "After get Storage points to %p. State is %p\n", stateStorage->data, state); */
 }
 
 
 void THRandom_setState(THLongTensor* src, long offset, long _left)
 {
-  fprintf(stderr, "Before set. src point to %p. Storage points to %p. State is %p\n",
-		  THLongTensor_data(src), stateStorage->data, state);
+/*  fprintf(stderr, "Before set. src point to %p. Storage points to %p. State is %p\n",
+		  THLongTensor_data(src), stateStorage->data, state); */
   //! \todo ensure that the state storage exists
   THArgCheck(THLongTensor_nElement(src) == n, 1, "state should have 624 elements");
   // src = THLongTensor_newContiguous(src);
@@ -146,8 +146,8 @@ void THRandom_setState(THLongTensor* src, long offset, long _left)
   next = state + offset;
   left = _left;
   initf = 1;
-  fprintf(stderr, "After set src points to %p. Storage points to %p. State is %p\n",
-		  THLongTensor_data(src), stateStorage->data, state);
+  /* fprintf(stderr, "After set src points to %p. Storage points to %p. State is %p\n",
+		  THLongTensor_data(src), stateStorage->data, state); */
 }
 
 
@@ -175,7 +175,7 @@ void THRandom_nextState()
 
 unsigned long THRandom_random()
 {
-  fprintf(stderr, "Before random Storage points to %p. State is %p\n", stateStorage->data, state);
+  /* fprintf(stderr, "Before random Storage points to %p. State is %p\n", stateStorage->data, state); */
   unsigned long y;
 
   if (--left == 0)
@@ -188,7 +188,7 @@ unsigned long THRandom_random()
   y ^= (y << 15) & 0xefc60000UL;
   y ^= (y >> 18);
 
-  fprintf(stderr, "After random Storage points to %p. State is %p\n", stateStorage->data, state);
+  /* fprintf(stderr, "After random Storage points to %p. State is %p\n", stateStorage->data, state); */
   return y;
 }
 

@@ -402,6 +402,17 @@ function torchtest.BugInAssertTableEq()
    mytester:assertTableNe(t, {1,2,3,4}, 'assertTableNe: different size not deemed different')
 end
 
+function torchtest.RNGState()
+   local ignored = torch.rand(1000)
+   local s, offset, left = torch.getRNGState()
+   local stateCloned = s:clone()
+   local before = torch.rand(1000)
+   torch.setRNGState(stateCloned, offset, left)
+   local after = torch.rand(1000)
+   mytester:assertTensorEq(before, after, 1e-16, 'getRNGState/setRNGState not generating same sequence')
+end
+
+
 function torch.test()
    math.randomseed(os.time())
    mytester = torch.Tester()
