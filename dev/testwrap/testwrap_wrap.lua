@@ -19,9 +19,9 @@ interface:wrap('wraponedouble',
                {{name="long"}}
            )
 --]]
-interface:wrap('wraponedoublecreturned',
-               'THTestWrap_onedoublecreturned',
-               {{name="long", creturned=true}}
+interface:wrap('CReturnOneDouble',
+               'THTestWrap_CReturnOneDouble',
+               {{name="double", creturned=true}}
            )
 
 interface:register("testwrap__")

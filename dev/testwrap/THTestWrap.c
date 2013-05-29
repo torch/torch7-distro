@@ -6,10 +6,10 @@
     *a = 19;
     *b = 83;
 } */
-void THTestWrap_onedouble(double * a) {
+void THTestWrap_ReturnOneDouble(double * a) {
     *a = 19;
 }
 
-double THTestWrap_onedoublecreturned() {
+double THTestWrap_CReturnOneDouble() {
     return 19;
 }
