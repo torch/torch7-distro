@@ -357,7 +357,11 @@ for _,typename in ipairs({"real", "unsigned char", "char", "short", "int", "long
              end,
       
       carg = function(arg)
-                return string.format('arg%d', arg.i)
+                if arg.returned then
+                   return string.format('&arg%d', arg.i)
+                else
+                   return string.format('arg%d', arg.i)
+                end
              end,
 
       creturn = function(arg)
