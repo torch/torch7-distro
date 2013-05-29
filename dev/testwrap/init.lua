@@ -8,6 +8,12 @@ function testwrap.testCReturn()
     tester:asserteq(a, 19, 'Wrong number returned')
 end
 
+
+function testwrap.testReturn()
+    local a = libtestwrap.ReturnOneDouble()
+    tester:asserteq(a, 19, 'Wrong number returned')
+end
+
 tester:add(testwrap)
 tester:run()
 

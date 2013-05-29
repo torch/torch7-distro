@@ -3,6 +3,6 @@
 
 #include "THGeneral.h"
 
-//void THTestWrap_ReturnOneDouble(double * a);
+void THTestWrap_ReturnOneDouble(double * a);
 double THTestWrap_CReturnOneDouble();
 #endif

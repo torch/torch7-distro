@@ -14,11 +14,12 @@ interface:wrap('wraptwodouble',
                {name="long"}
            })
 
-interface:wrap('wraponedouble',
-               'THTestWrap_onedouble',
-               {{name="long"}}
-           )
 --]]
+interface:wrap('ReturnOneDouble',
+               'THTestWrap_ReturnOneDouble',
+               {{name="double", returned=true}}
+           )
+
 interface:wrap('CReturnOneDouble',
                'THTestWrap_CReturnOneDouble',
                {{name="double", creturned=true}}
