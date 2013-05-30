@@ -335,6 +335,9 @@ for _,typename in ipairs({"real", "unsigned char", "char", "short", "int", "long
       declare = function(arg)
                    -- if it is a number we initialize here
                    local default = tonumber(interpretdefaultvalue(arg)) or 0
+                   if arg.returned and (not arg.invisible) then
+                       error(string.format('Returned arguments of type *%s* must have invisible=true', typename))
+                   end
                    return string.format("%s arg%d = %d;", typename, arg.i, tonumber(default))
                 end,
 

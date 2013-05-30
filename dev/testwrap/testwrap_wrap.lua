@@ -17,7 +17,7 @@ interface:wrap('wraptwodouble',
 --]]
 interface:wrap('ReturnOneDouble',
                'THTestWrap_ReturnOneDouble',
-               {{name="double", returned=true}}
+               {{name="double", returned=true, invisible=true, default=0}}
            )
 
 interface:wrap('CReturnOneDouble',
