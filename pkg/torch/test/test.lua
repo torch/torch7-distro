@@ -402,6 +402,19 @@ function torchtest.BugInAssertTableEq()
    mytester:assertTableNe(t, {1,2,3,4}, 'assertTableNe: different size not deemed different')
 end
 
+function torchtest.WrapBasicTypeCReturn()
+    local tw = require('libtestwrap')
+    local a = tw.CReturnOneDouble()
+    mytester:asserteq(a, 19, 'Wrong number returned')
+end
+
+function torchtest.WrapBasicTypeReturn()
+    local tw = require('libtestwrap')
+    local a = tw.ReturnOneDouble()
+    mytester:asserteq(a, 19, 'Wrong number returned')
+end
+
+
 function torch.test()
    math.randomseed(os.time())
    mytester = torch.Tester()
