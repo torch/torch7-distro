@@ -369,13 +369,10 @@ for _,typename in ipairs({"real", "unsigned char", "char", "short", "int", "long
                 end,
       
       precall = function(arg)
-                   if arg.returned then
-                      return string.format('lua_pushnumber(L, (lua_Number)arg%d);', arg.i)
-                   end
                 end,
       
       postcall = function(arg)
-                    if arg.creturned then
+                    if arg.creturned or arg.returned then
                        return string.format('lua_pushnumber(L, (lua_Number)arg%d);', arg.i)
                     end
                  end
