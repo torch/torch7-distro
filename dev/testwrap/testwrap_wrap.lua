@@ -25,6 +25,17 @@ interface:wrap('CReturnOneDouble',
                {{name="double", creturned=true}}
            )
 
+interface:wrap('ReturnOneIndex',
+               'THTestWrap_ReturnOneIndex',
+               {{name="index", returned=true, invisible=true, default=0}}
+           )
+
+interface:wrap('ReturnOneBoolean',
+               'THTestWrap_ReturnOneBoolean',
+               {{name="boolean", returned=true, invisible=true, default=0}}
+           )
+
+
 interface:register("testwrap__")
 
 interface:print(

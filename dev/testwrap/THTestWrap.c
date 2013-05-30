@@ -1,11 +1,6 @@
 #include "THGeneral.h"
 #include "THTestWrap.h"
 
-/* DO NOT RUN
- * void THTestWrap_twodouble(double * a, double * b) {
-    *a = 19;
-    *b = 83;
-} */
 void THTestWrap_ReturnOneDouble(double * a) {
     *a = 19;
 }
@@ -13,3 +8,12 @@ void THTestWrap_ReturnOneDouble(double * a) {
 double THTestWrap_CReturnOneDouble() {
     return 19;
 }
+
+void THTestWrap_ReturnOneIndex(long * a) {
+    *a = 19;
+}
+
+void THTestWrap_ReturnOneBoolean(int * a) {
+    *a = 1;
+}
+

@@ -283,6 +283,9 @@ wrap.argtypes.index = {
    declare = function(arg)
                 -- if it is a number we initialize here
                 local default = tonumber(interpretdefaultvalue(arg)) or 1
+                if arg.returned and (not arg.invisible) then
+                    error('Returned arguments of type *index* must have invisible=true')
+                end
                 return string.format("long arg%d = %d;", arg.i, tonumber(default)-1)
            end,
 
@@ -305,7 +308,11 @@ wrap.argtypes.index = {
           end,
 
    carg = function(arg)
-             return string.format('arg%d', arg.i)
+            if arg.returned then
+               return string.format('&arg%d', arg.i)
+            else
+               return string.format('arg%d', arg.i)
+            end
           end,
 
    creturn = function(arg)
@@ -313,13 +320,10 @@ wrap.argtypes.index = {
              end,
 
    precall = function(arg)
-                if arg.returned then
-                   return string.format('lua_pushnumber(L, (lua_Number)arg%d+1);', arg.i)
-                end
              end,
 
    postcall = function(arg)
-                 if arg.creturned then
+                 if arg.creturned or arg.returned then
                     return string.format('lua_pushnumber(L, (lua_Number)arg%d+1);', arg.i)
                  end
               end
@@ -393,6 +397,9 @@ wrap.argtypes.boolean = {
    declare = function(arg)
                 -- if it is a number we initialize here
                 local default = tonumber(interpretdefaultvalue(arg)) or 0
+                if arg.returned and (not arg.invisible) then
+                    error('Returned arguments of type *boolean* must have invisible=true')
+                end
                 return string.format("int arg%d = %d;", arg.i, tonumber(default))
              end,
 
@@ -415,7 +422,11 @@ wrap.argtypes.boolean = {
           end,
 
    carg = function(arg)
-             return string.format('arg%d', arg.i)
+             if arg.returned then
+                return string.format('&arg%d', arg.i)
+             else
+                return string.format('arg%d', arg.i)
+             end
           end,
 
    creturn = function(arg)
@@ -423,13 +434,10 @@ wrap.argtypes.boolean = {
              end,
 
    precall = function(arg)
-                if arg.returned then
-                   return string.format('lua_pushboolean(L, arg%d);', arg.i)
-                end
              end,
 
    postcall = function(arg)
-                 if arg.creturned then
+                 if arg.creturned or arg.returned then
                     return string.format('lua_pushboolean(L, arg%d);', arg.i)
                  end
               end
