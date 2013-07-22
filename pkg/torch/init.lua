@@ -75,6 +75,7 @@ include('Tensor.lua')
 include('File.lua')
 include('CmdLine.lua')
 include('Tester.lua')
+include('RandomNumber.lua')
 include('test.lua')
 
 return torch
