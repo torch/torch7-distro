@@ -675,7 +675,8 @@ function gnuplot.figprint(fname)
    if suffix == 'eps' then
       term = 'postscript eps enhanced color'
    elseif suffix == 'png' then
-      term = 'png size "1024,768"'
+      term = gnuplothasterm('pngcairo') and 'pngcairo' or 'png'
+      term = term .. ' size "1024,768"'
    else
       error('only eps and png for figprint')
    end
