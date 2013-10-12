@@ -313,7 +313,7 @@ Creates a figure directly on the ''eps'' file given with
 {{anchor:gnuplot.pngfigure}}
 
 Creates a figure directly on the ''png'' file given with
-''fname''. This uses ''Gnuplot'' terminal ''png''.
+''fname''. This uses ''Gnuplot'' terminal ''png'', or ''pngcairo'' if available.
 
 ====  gnuplot.plotflush([n]) ====
 {{anchor:gnuplot.plotflush}}
