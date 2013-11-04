@@ -513,6 +513,34 @@ function torchtest.RNGState()
    mytester:assertTensorEq(before, after, 1e-16, 'getRNGState/setRNGState not generating same sequence')
 end
 
+function torchtest.RNGStateGauss()
+   -- Test for issue #191
+   local before, after
+
+   local state = torch.getRNGState()
+   before = torch.randn(1)
+
+   torch.setRNGState(state)
+   after = torch.randn(1)
+
+   mytester:assertTensorEq(before, after, 1e-16, 'getRNGState/setRNGState not generating same odd gaussian sequence')
+end
+
+function torchtest.manualSeedGauss()
+   -- Test for issue #191
+   local before, after
+
+   torch.manualSeed(1234567890)
+   before = torch.randn(1)
+
+   torch.manualSeed(1234567890)
+   after = torch.randn(1)
+
+   mytester:assertTensorEq(before, after, 1e-16, 'manualSeed not generating same odd gaussian sequence')
+end
+
+
+
 function torchtest.testCholesky()
     local x = torch.rand(10,10)
     local A = torch.mm(x, x:t())
