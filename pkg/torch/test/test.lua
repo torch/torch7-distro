@@ -503,10 +503,13 @@ end
 function torchtest.RNGState()
    local ignored = torch.rand(1000)
    local state = torch.getRNGState()
-   local stateCloned = state:clone()
-   local before = torch.rand(1000)
+   local stateCloned = {
+       mt = state.mt:clone(),
+       normal = state.normal:clone()
+   }
 
-   mytester:assert(state:ne(stateCloned):long():sum() == 0, 'RNG (supposedly cloned) state has changed after random number generation')
+   local before = torch.rand(1000)
+   mytester:assert(state.mt:ne(stateCloned.mt):long():sum() == 0, 'RNG MT (supposedly cloned) state has changed after random number generation')
 
    torch.setRNGState(state)
    local after = torch.rand(1000)
@@ -518,7 +521,11 @@ function torchtest.RNGStateGauss()
    local before, after
 
    local state = torch.getRNGState()
-   local stateCloned = state:clone()
+   local stateCloned = {
+       mt = state.mt:clone(),
+       normal = state.normal:clone()
+   }
+
    before = torch.randn(1)
 
    torch.setRNGState(stateCloned)

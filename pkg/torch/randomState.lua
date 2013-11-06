@@ -1,7 +1,11 @@
 function torch.getRNGState()
-    return torch.getMTState()
+    return {
+        mt = torch.getMTState(),
+        normal = torch.getNormalState()
+    }
 end
 
 function torch.setRNGState(state)
-    return torch.setMTState(state)
+    torch.setMTState(state.mt)
+    torch.setNormalState(state.normal)
 end
