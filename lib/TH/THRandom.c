@@ -102,6 +102,8 @@ void THRandom_manualSeed(unsigned long the_seed_)
   }
   left = 1;
   initf = 1;
+  /* Added for the normal distribution */
+  normal_is_valid = 0;
 }
 
 unsigned long THRandom_initialSeed()
