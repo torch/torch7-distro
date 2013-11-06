@@ -63,7 +63,7 @@ TH_API void THTensor_(logNormal)(THTensor *self, double mean, double stdv)
 #endif
 
 #if defined(TH_REAL_IS_LONG)
-TH_API void THTensor_(getRNGState)(THTensor *self)
+TH_API void THTensor_(getMTState)(THTensor *self)
 {
   unsigned long *data;
   long *offset;
@@ -74,10 +74,10 @@ TH_API void THTensor_(getRNGState)(THTensor *self)
   offset = (long *)data+624;
   left = (long *)data+625;
 
-  THRandom_getState(data,offset,left);
+  THRandom_getMTState(data,offset,left);
 }
 
-TH_API void THTensor_(setRNGState)(THTensor *self)
+TH_API void THTensor_(setMTState)(THTensor *self)
 {
   unsigned long *data;
   long *offset;
@@ -88,7 +88,7 @@ TH_API void THTensor_(setRNGState)(THTensor *self)
   offset = (long *)(data+624);
   left = (long *)(data+625);
 
-  THRandom_setState(data,*offset,*left);
+  THRandom_setMTState(data,*offset,*left);
 }
 
 #endif

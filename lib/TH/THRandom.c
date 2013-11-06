@@ -240,7 +240,7 @@ int THRandom_bernoulli(double p)
 }
 
 /* returns the random number state */
-void THRandom_getState(unsigned long *_state, long *offset, long *_left)
+void THRandom_getMTState(unsigned long *_state, long *offset, long *_left)
 {
   if(initf == 0)
     THRandom_seed();
@@ -250,7 +250,7 @@ void THRandom_getState(unsigned long *_state, long *offset, long *_left)
 }
 
 /* sets the random number state */
-void THRandom_setState(unsigned long *_state, long offset, long _left)
+void THRandom_setMTState(unsigned long *_state, long offset, long _left)
 {
   memmove(state, _state, n*sizeof(long));
   next = state + offset;

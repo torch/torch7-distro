@@ -76,5 +76,6 @@ include('File.lua')
 include('CmdLine.lua')
 include('Tester.lua')
 include('test.lua')
+include('randomState.lua')
 
 return torch
