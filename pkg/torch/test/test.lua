@@ -518,9 +518,10 @@ function torchtest.RNGStateGauss()
    local before, after
 
    local state = torch.getRNGState()
+   local stateCloned = state:clone()
    before = torch.randn(1)
 
-   torch.setRNGState(state)
+   torch.setRNGState(stateCloned)
    after = torch.randn(1)
 
    mytester:assertTensorEq(before, after, 1e-16, 'getRNGState/setRNGState not generating same odd gaussian sequence')
