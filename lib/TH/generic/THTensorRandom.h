@@ -14,9 +14,14 @@ TH_API void THTensor_(cauchy)(THTensor *self, double median, double sigma);
 TH_API void THTensor_(logNormal)(THTensor *self, double mean, double stdv);
 #endif
 
+#if defined(TH_REAL_IS_DOUBLE)
+TH_API void THTensor_(getNormalState)(THTensor *self);
+TH_API void THTensor_(setNormalState)(THTensor *self);
+#endif
+
 #if defined(TH_REAL_IS_LONG)
-TH_API void THTensor_(getRNGState)(THTensor *self);
-TH_API void THTensor_(setRNGState)(THTensor *self);
+TH_API void THTensor_(getMTState)(THTensor *self);
+TH_API void THTensor_(setMTState)(THTensor *self);
 #endif
 
 #endif

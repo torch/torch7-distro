@@ -503,15 +503,51 @@ end
 function torchtest.RNGState()
    local ignored = torch.rand(1000)
    local state = torch.getRNGState()
-   local stateCloned = state:clone()
-   local before = torch.rand(1000)
+   local stateCloned = {
+       mt = state.mt:clone(),
+       normal = state.normal:clone()
+   }
 
-   mytester:assert(state:ne(stateCloned):long():sum() == 0, 'RNG (supposedly cloned) state has changed after random number generation')
+   local before = torch.rand(1000)
+   mytester:assert(state.mt:ne(stateCloned.mt):long():sum() == 0, 'RNG MT (supposedly cloned) state has changed after random number generation')
 
    torch.setRNGState(state)
    local after = torch.rand(1000)
    mytester:assertTensorEq(before, after, 1e-16, 'getRNGState/setRNGState not generating same sequence')
 end
+
+function torchtest.RNGStateGauss()
+   -- Test for issue #191
+   local before, after
+
+   local state = torch.getRNGState()
+   local stateCloned = {
+       mt = state.mt:clone(),
+       normal = state.normal:clone()
+   }
+
+   before = torch.randn(1)
+
+   torch.setRNGState(stateCloned)
+   after = torch.randn(1)
+
+   mytester:assertTensorEq(before, after, 1e-16, 'getRNGState/setRNGState not generating same odd gaussian sequence')
+end
+
+function torchtest.manualSeedGauss()
+   -- Test for issue #191
+   local before, after
+
+   torch.manualSeed(1234567890)
+   before = torch.randn(1)
+
+   torch.manualSeed(1234567890)
+   after = torch.randn(1)
+
+   mytester:assertTensorEq(before, after, 1e-16, 'manualSeed not generating same odd gaussian sequence')
+end
+
+
 
 function torchtest.testCholesky()
     local x = torch.rand(10,10)

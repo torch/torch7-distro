@@ -102,6 +102,8 @@ void THRandom_manualSeed(unsigned long the_seed_)
   }
   left = 1;
   initf = 1;
+  /* Added for the normal distribution */
+  normal_is_valid = 0;
 }
 
 unsigned long THRandom_initialSeed()
@@ -238,7 +240,7 @@ int THRandom_bernoulli(double p)
 }
 
 /* returns the random number state */
-void THRandom_getState(unsigned long *_state, long *offset, long *_left)
+void THRandom_getMTState(unsigned long *_state, long *offset, long *_left)
 {
   if(initf == 0)
     THRandom_seed();
@@ -247,11 +249,26 @@ void THRandom_getState(unsigned long *_state, long *offset, long *_left)
   *_left = left;
 }
 
+void THRandom_getNormalState(int * _normal_is_valid, double * _normal_x, double *_normal_rho)
+{
+  if(initf == 0)
+      THError("You must call getMTState before getNormalState");
+  *_normal_is_valid = normal_is_valid;
+  *_normal_x        = normal_x;
+  *_normal_rho      = normal_rho;
+}
+
 /* sets the random number state */
-void THRandom_setState(unsigned long *_state, long offset, long _left)
+void THRandom_setMTState(unsigned long *_state, long offset, long _left)
 {
   memmove(state, _state, n*sizeof(long));
   next = state + offset;
   left = _left;
   initf = 1;
+}
+void THRandom_setNormalState(int _normal_is_valid, double _normal_x, double _normal_rho) 
+{
+  normal_is_valid = _normal_is_valid;
+  normal_x        = _normal_x;
+  normal_rho      = _normal_rho;
 }

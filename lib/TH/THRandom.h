@@ -50,8 +50,10 @@ TH_API int THRandom_geometric(double p);
 TH_API int THRandom_bernoulli(double p);
 
 /* returns the random number state */
-TH_API void THRandom_getState(unsigned long *state, long *offset, long *_left);
+TH_API void THRandom_getMTState(unsigned long *state, long *offset, long *_left);
+TH_API void THRandom_getNormalState(int * _normal_is_valid, double * _normal_x, double *_normal_rho);
 
 /* sets the random number state */
-TH_API void THRandom_setState(unsigned long *state, long offset, long _left);
+TH_API void THRandom_setMTState(unsigned long *state, long offset, long _left);
+TH_API void THRandom_setNormalState(int _normal_is_valid, double _normal_x, double _normal_rho);
 #endif

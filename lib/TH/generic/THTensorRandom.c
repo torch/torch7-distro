@@ -59,11 +59,45 @@ TH_API void THTensor_(logNormal)(THTensor *self, double mean, double stdv)
 {
   TH_TENSOR_APPLY(real, self, *self_data = (real)THRandom_logNormal(mean, stdv););
 }
+#endif
 
+#if defined(TH_REAL_IS_DOUBLE)
+TH_API void THTensor_(getNormalState)(THTensor *self)
+{
+  int normal_is_valid;
+  double * data;
+  double * normal_x;
+  double * normal_rho;
+
+  THTensor_(resize1d)(self,3);
+  data = (double *)THTensor_(data)(self);
+  normal_x = data+1;
+  normal_rho = data+2;
+
+  THRandom_getNormalState(&normal_is_valid, normal_x, normal_rho);
+  *data = (double)normal_is_valid;
+}
+
+TH_API void THTensor_(setNormalState)(THTensor *self)
+{
+  int normal_is_valid;
+  double * data;
+  double normal_x;
+  double normal_rho;
+
+
+  THArgCheck(THTensor_(nElement)(self) == 3, 1, "state should have 3 elements");
+  data = (double *)THTensor_(data)(self);
+  normal_is_valid = (int)data[0];
+  normal_x = data[1];
+  normal_rho = data[2];
+
+  THRandom_setNormalState(normal_is_valid, normal_x, normal_rho);
+}
 #endif
 
 #if defined(TH_REAL_IS_LONG)
-TH_API void THTensor_(getRNGState)(THTensor *self)
+TH_API void THTensor_(getMTState)(THTensor *self)
 {
   unsigned long *data;
   long *offset;
@@ -74,10 +108,10 @@ TH_API void THTensor_(getRNGState)(THTensor *self)
   offset = (long *)data+624;
   left = (long *)data+625;
 
-  THRandom_getState(data,offset,left);
+  THRandom_getMTState(data,offset,left);
 }
 
-TH_API void THTensor_(setRNGState)(THTensor *self)
+TH_API void THTensor_(setMTState)(THTensor *self)
 {
   unsigned long *data;
   long *offset;
@@ -88,7 +122,7 @@ TH_API void THTensor_(setRNGState)(THTensor *self)
   offset = (long *)(data+624);
   left = (long *)(data+625);
 
-  THRandom_setState(data,*offset,*left);
+  THRandom_setMTState(data,*offset,*left);
 }
 
 #endif
