@@ -3,6 +3,35 @@
 
 #include "THGeneral.h"
 
+
+typedef struct {
+  /* The initial seed. */
+  unsigned long the_initial_seed;
+
+  /* Code for the Mersenne Twister random generator.... */
+#define n 624
+#define m 397
+  int left;
+  int initf;
+  unsigned long *next;
+  unsigned long state[n]; /* the array for the state vector  */
+  /********************************/
+
+  /* For normal distribution */
+  double normal_x;
+  double normal_y;
+  double normal_rho;
+  int normal_is_valid; /* = 0;*/
+} THRandomTLS;
+#undef n
+#undef m
+
+/* Initializes a thread local storage THRandomTLS for the entire RNG, to be passed to every function */
+TH_API void THRandom_initializeTLS();
+
+/* Gets the current thread's TLS */
+TH_API THRandomTLS* THRandom_getTLS();
+
 /* Initializes the random number generator with the current time (granularity: seconds) and returns the seed. */
 TH_API unsigned long THRandom_seed();
 
@@ -14,40 +43,48 @@ TH_API unsigned long THRandom_initialSeed();
 
 /* Generates a uniform 32 bits integer. */
 TH_API unsigned long THRandom_random();
+TH_API unsigned long THRandom_randomWithState(THRandomTLS* rstate);
 
 /* Generates a uniform random number on [0,1[. */
 TH_API double THRandom_uniform(double a, double b);
+TH_API double THRandom_uniformWithState(THRandomTLS* rstate, double a, double b);
 
 /** Generates a random number from a normal distribution.
     (With mean #mean# and standard deviation #stdv >= 0#).
 */
 TH_API double THRandom_normal(double mean, double stdv);
+TH_API double THRandom_normalWithState(THRandomTLS* rstate, double a, double b);
 
 /** Generates a random number from an exponential distribution.
     The density is $p(x) = lambda * exp(-lambda * x)$, where
     lambda is a positive number.
 */
 TH_API double THRandom_exponential(double lambda);
+TH_API double THRandom_exponentialWithState(THRandomTLS* rstate, double lambda);
 
 /** Returns a random number from a Cauchy distribution.
     The Cauchy density is $p(x) = sigma/(pi*(sigma^2 + (x-median)^2))$
 */
 TH_API double THRandom_cauchy(double median, double sigma);
+TH_API double THRandom_cauchyWithState(THRandomTLS* rstate, double median, double sigma);
 
 /** Generates a random number from a log-normal distribution.
     (#mean > 0# is the mean of the log-normal distribution
     and #stdv# is its standard deviation).
 */
 TH_API double THRandom_logNormal(double mean, double stdv);
+TH_API double THRandom_logNormalWithState(THRandomTLS* rstate, double mean, double stdv);
 
 /** Generates a random number from a geometric distribution.
     It returns an integer #i#, where $p(i) = (1-p) * p^(i-1)$.
     p must satisfy $0 < p < 1$.
 */
 TH_API int THRandom_geometric(double p);
+TH_API int THRandom_geometricWithState(THRandomTLS* rstate, double p);
 
 /* Returns true with probability $p$ and false with probability $1-p$ (p > 0). */
 TH_API int THRandom_bernoulli(double p);
+TH_API int THRandom_bernoulliWithState(THRandomTLS* rstate, double p);
 
 /* returns the random number state */
 TH_API void THRandom_getState(unsigned long *state, long *offset, long *_left);

@@ -902,7 +902,7 @@ void THTensor_(randperm)(THTensor *r_, long n)
 
   for(i = 0; i < n; i++)
     r__data[i*r__stride_0] = (real)(i);
-
+  
   for(i = 0; i < n-1; i++)
   {    
     long z = THRandom_random() % (n-i);
