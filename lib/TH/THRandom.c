@@ -15,6 +15,7 @@
 
 #if defined(C_HAS_PTHREADS)
 #include <pthread.h>
+static pthread_once_t THRandom_tlsInitFlag = PTHREAD_ONCE_INIT;
 static pthread_key_t THRandom_defaultTLSkey;
 #else
 static TLSPREFIX THRandomTLS* THRandom_defaultTLS = NULL;
@@ -36,9 +37,22 @@ void THRandom_initializeTLS()
 #endif
 }
 
+#if defined(C_HAS_PTHREADS)
+static void destroy_tls() {
+  THRandomTLS* rstate = (THRandomTLS*)pthread_getspecific(THRandom_defaultTLSkey);
+  if (rstate != NULL) free(rstate);  
+}
+static void create_tls_key() {
+  if (pthread_key_create(&THRandom_defaultTLSkey, destroy_tls)) {
+    THError("pthread could not generate any more keys in pthread_key_create");
+  }
+}
+#endif
+
 THRandomTLS* THRandom_getTLS()
 {
 #if defined(C_HAS_PTHREADS)
+  pthread_once(&THRandom_tlsInitFlag, create_tls_key);
   THRandomTLS* rstate = (THRandomTLS*)pthread_getspecific(THRandom_defaultTLSkey);
   if (rstate == NULL) {
     THRandom_initializeTLS();
