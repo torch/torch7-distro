@@ -1,18 +1,27 @@
 #include "THGeneral.h"
 
+#ifdef C_HAS_TLS_POSIX
+#define TLSPREFIX __thread
+#elif C_HAS_TLS_WIN32
+#define TLSPREFIX __declspec( thread )
+#else
+#define TLSPREFIX
+#endif
+
 /* Torch Error Handling */
-static void defaultTorchErrorHandlerFunction(const char *msg)
+static void defaultTorchErrorHandlerFunction(const char *msg, void* data)
 {
   printf("$ Error: %s\n", msg);
   exit(-1);
 }
 
-static void (*torchErrorHandlerFunction)(const char *msg) = defaultTorchErrorHandlerFunction;
+static TLSPREFIX void (*torchErrorHandlerFunction)(const char *msg, void *data) = defaultTorchErrorHandlerFunction;
+static TLSPREFIX void *torchErrorHandlerData;
 
 void THError(const char *fmt, ...)
 {
-  static char msg[1024];
-  va_list args;
+  static TLSPREFIX char msg[1024];
+  va_list args;  
 
   /* vasprintf not standard */
   /* vsnprintf: how to handle if does not exists? */
@@ -20,19 +29,20 @@ void THError(const char *fmt, ...)
   vsnprintf(msg, 1024, fmt, args);
   va_end(args);
 
-  (*torchErrorHandlerFunction)(msg);
+  (*torchErrorHandlerFunction)(msg, torchErrorHandlerData);
 }
 
-void THSetErrorHandler( void (*torchErrorHandlerFunction_)(const char *msg) )
+void THSetErrorHandler( void (*torchErrorHandlerFunction_)(const char *msg, void *data), void *data )
 {
   if(torchErrorHandlerFunction_)
     torchErrorHandlerFunction = torchErrorHandlerFunction_;
   else
     torchErrorHandlerFunction = defaultTorchErrorHandlerFunction;
+  torchErrorHandlerData = data;
 }
 
 /* Torch Arg Checking Handling */
-static void defaultTorchArgErrorHandlerFunction(int argNumber, const char *msg)
+static void defaultTorchArgErrorHandlerFunction(int argNumber, const char *msg, void *data)
 {
   if(msg)
     printf("$ Invalid argument %d: %s\n", argNumber, msg);
@@ -41,20 +51,23 @@ static void defaultTorchArgErrorHandlerFunction(int argNumber, const char *msg)
   exit(-1);
 }
 
-static void (*torchArgErrorHandlerFunction)(int argNumber, const char *msg) = defaultTorchArgErrorHandlerFunction;
+static TLSPREFIX void (*torchArgErrorHandlerFunction)(int argNumber, const char *msg, void *data) = defaultTorchArgErrorHandlerFunction;
+static TLSPREFIX void *torchArgErrorHandlerData;
+
 
 void THArgCheck(int condition, int argNumber, const char *msg)
 {
   if(!condition)
-    (*torchArgErrorHandlerFunction)(argNumber, msg);
+    (*torchArgErrorHandlerFunction)(argNumber, msg, torchArgErrorHandlerData);
 }
 
-void THSetArgErrorHandler( void (*torchArgErrorHandlerFunction_)(int argNumber, const char *msg) )
+void THSetArgErrorHandler( void (*torchArgErrorHandlerFunction_)(int argNumber, const char *msg, void *data), void *data )
 {
   if(torchArgErrorHandlerFunction_)
     torchArgErrorHandlerFunction = torchArgErrorHandlerFunction_;
   else
     torchArgErrorHandlerFunction = defaultTorchArgErrorHandlerFunction;
+  torchArgErrorHandlerData = data;
 }
 
 void* THAlloc(long size)

@@ -1,23 +1,69 @@
 #include "THGeneral.h"
 #include "THRandom.h"
 
-/* The initial seed. */
-static unsigned long the_initial_seed;
-
 /* Code for the Mersenne Twister random generator.... */
 #define n 624
 #define m 397
-static int left = 1;
-static int initf = 0;
-static unsigned long *next;
-static unsigned long state[n]; /* the array for the state vector  */
-/********************************/
 
-/* For normal distribution */
-static double normal_x;
-static double normal_y;
-static double normal_rho;
-static int normal_is_valid = 0;
+#ifdef C_HAS_TLS_POSIX
+#define TLSPREFIX __thread
+#elif C_HAS_TLS_WIN32
+#define TLSPREFIX __declspec( thread )
+#else
+#define TLSPREFIX
+#endif
+
+#if defined(C_HAS_PTHREADS)
+#include <pthread.h>
+static pthread_once_t THRandom_tlsInitFlag = PTHREAD_ONCE_INIT;
+static pthread_key_t THRandom_defaultTLSkey;
+#else
+static TLSPREFIX THRandomTLS* THRandom_defaultTLS = NULL;
+#endif
+
+void THRandom_initializeTLS()
+{  
+  THRandomTLS* state = (THRandomTLS*) malloc(sizeof(THRandomTLS));
+  (*state).left = 1;
+  (*state).initf = 0;
+  (*state).normal_is_valid = 0;
+
+#if defined(C_HAS_PTHREADS)
+  if (pthread_setspecific(THRandom_defaultTLSkey, (void *)state) != 0) {
+    THError("pthread could not generate any more keys in pthread_setspecific");
+  }
+#else
+  THRandom_defaultTLS = state;
+#endif
+}
+
+#if defined(C_HAS_PTHREADS)
+static void destroy_tls() {
+  THRandomTLS* rstate = (THRandomTLS*)pthread_getspecific(THRandom_defaultTLSkey);
+  if (rstate != NULL) free(rstate);  
+}
+static void create_tls_key() {
+  if (pthread_key_create(&THRandom_defaultTLSkey, destroy_tls)) {
+    THError("pthread could not generate any more keys in pthread_key_create");
+  }
+}
+#endif
+
+THRandomTLS* THRandom_getTLS()
+{
+#if defined(C_HAS_PTHREADS)
+  pthread_once(&THRandom_tlsInitFlag, create_tls_key);
+  THRandomTLS* rstate = (THRandomTLS*)pthread_getspecific(THRandom_defaultTLSkey);
+  if (rstate == NULL) {
+    THRandom_initializeTLS();
+    rstate = (THRandomTLS*)pthread_getspecific(THRandom_defaultTLSkey);
+  }
+  return rstate;
+#else
+  if (THRandom_defaultTLS == NULL) THRandom_initializeTLS();
+  return THRandom_defaultTLS;
+#endif
+}
 
 unsigned long THRandom_seed()
 {
@@ -88,44 +134,46 @@ unsigned long THRandom_seed()
 
 void THRandom_manualSeed(unsigned long the_seed_)
 {
+  THRandomTLS *rstate = THRandom_getTLS();
   int j;
-  the_initial_seed = the_seed_;
-  state[0]= the_initial_seed & 0xffffffffUL;
+  (*rstate).the_initial_seed = the_seed_;
+  (*rstate).state[0]= (*rstate).the_initial_seed & 0xffffffffUL;
   for(j = 1; j < n; j++)
   {
-    state[j] = (1812433253UL * (state[j-1] ^ (state[j-1] >> 30)) + j); 
+    (*rstate).state[j] = (1812433253UL * ((*rstate).state[j-1] ^ ((*rstate).state[j-1] >> 30)) + j); 
     /* See Knuth TAOCP Vol2. 3rd Ed. P.106 for multiplier. */
     /* In the previous versions, mSBs of the seed affect   */
     /* only mSBs of the array state[].                        */
     /* 2002/01/09 modified by makoto matsumoto             */
-    state[j] &= 0xffffffffUL;  /* for >32 bit machines */
+    (*rstate).state[j] &= 0xffffffffUL;  /* for >32 bit machines */
   }
-  left = 1;
-  initf = 1;
+  (*rstate).left = 1;
+  (*rstate).initf = 1;
 }
 
 unsigned long THRandom_initialSeed()
 {
-  if(initf == 0)
+  THRandomTLS *rstate = THRandom_getTLS();
+  if((*rstate).initf == 0)
   {
     THRandom_seed();
   }
 
-  return the_initial_seed;
+  return (*rstate).the_initial_seed;
 }
 
-void THRandom_nextState()
+void THRandom_nextState(THRandomTLS* rstate)
 {
-  unsigned long *p=state;
+  unsigned long *p=(*rstate).state;
   int j;
 
   /* if init_genrand() has not been called, */
   /* a default initial seed is used         */
-  if(initf == 0)
+  if((*rstate).initf == 0)
     THRandom_seed();
 
-  left = n;
-  next = state;
+  (*rstate).left = n;
+  (*rstate).next = (*rstate).state;
     
   for(j = n-m+1; --j; p++) 
     *p = p[m] ^ TWIST(p[0], p[1]);
@@ -133,16 +181,22 @@ void THRandom_nextState()
   for(j = m; --j; p++) 
     *p = p[m-n] ^ TWIST(p[0], p[1]);
 
-  *p = p[m-n] ^ TWIST(p[0], state[0]);
+  *p = p[m-n] ^ TWIST(p[0], (*rstate).state[0]);
 }
 
 unsigned long THRandom_random()
 {
+  THRandomTLS *rstate = THRandom_getTLS();
+  return THRandom_randomWithState(rstate);
+}
+
+unsigned long THRandom_randomWithState(THRandomTLS* rstate)
+{
   unsigned long y;
 
-  if (--left == 0)
-    THRandom_nextState();
-  y = *next++;
+  if (--(*rstate).left == 0)
+    THRandom_nextState(rstate);
+  y = *((*rstate).next)++;
   
   /* Tempering */
   y ^= (y >> 11);
@@ -154,13 +208,12 @@ unsigned long THRandom_random()
 }
 
 /* generates a random number on [0,1)-double-interval */
-static double __uniform__()
+static double __uniform__(THRandomTLS* rstate)
 {
   unsigned long y;
-
-  if(--left == 0)
-    THRandom_nextState();
-  y = *next++;
+  if(--((*rstate).left) == 0)
+    THRandom_nextState(rstate);
+  y = *((*rstate).next)++;
 
   /* Tempering */
   y ^= (y >> 11);
@@ -179,79 +232,120 @@ static double __uniform__()
  Now my own code...
 
 *********************************************************/
-
 double THRandom_uniform(double a, double b)
 {
-  return(__uniform__() * (b - a) + a);
+  THRandomTLS *rstate = THRandom_getTLS();
+  return THRandom_uniformWithState(rstate, a, b);
+}
+double THRandom_uniformWithState(THRandomTLS* rstate, double a, double b)
+{
+  return(__uniform__(rstate) * (b - a) + a);
 }
 
 double THRandom_normal(double mean, double stdv)
 {
+  THRandomTLS *rstate = THRandom_getTLS();
+  return THRandom_normalWithState(rstate, mean, stdv);
+}
+
+double THRandom_normalWithState(THRandomTLS* rstate, double mean, double stdv)
+{
   THArgCheck(stdv > 0, 2, "standard deviation must be strictly positive");
 
-  if(!normal_is_valid)
+  if(!(*rstate).normal_is_valid)
   {
-    normal_x = __uniform__();
-    normal_y = __uniform__();
-    normal_rho = sqrt(-2. * log(1.0-normal_y));
-    normal_is_valid = 1;
+    (*rstate).normal_x = __uniform__(rstate);
+    (*rstate).normal_y = __uniform__(rstate);
+    (*rstate).normal_rho = sqrt(-2. * log(1.0-(*rstate).normal_y));
+    (*rstate).normal_is_valid = 1;
   }
   else
-    normal_is_valid = 0;
+    (*rstate).normal_is_valid = 0;
   
-  if(normal_is_valid)
-    return normal_rho*cos(2.*M_PI*normal_x)*stdv+mean;
+  if((*rstate).normal_is_valid)
+    return (*rstate).normal_rho*cos(2.*M_PI*(*rstate).normal_x)*stdv+mean;
   else
-    return normal_rho*sin(2.*M_PI*normal_x)*stdv+mean;
+    return (*rstate).normal_rho*sin(2.*M_PI*(*rstate).normal_x)*stdv+mean;
 }
 
 double THRandom_exponential(double lambda)
 {
-  return(-1. / lambda * log(1-__uniform__()));
+  THRandomTLS *rstate = THRandom_getTLS();
+  return THRandom_exponentialWithState(rstate, lambda);
+}
+ 
+double THRandom_exponentialWithState(THRandomTLS* rstate, double lambda)
+{
+  return(-1. / lambda * log(1-__uniform__(rstate)));
 }
 
 double THRandom_cauchy(double median, double sigma)
 {
-  return(median + sigma * tan(M_PI*(__uniform__()-0.5)));
+  THRandomTLS *rstate = THRandom_getTLS();
+  return THRandom_cauchyWithState(rstate, median, sigma);
+}
+ 
+double THRandom_cauchyWithState(THRandomTLS* rstate, double median, double sigma)
+{
+  return(median + sigma * tan(M_PI*(__uniform__(rstate)-0.5)));
 }
 
 /* Faut etre malade pour utiliser ca.
    M'enfin. */
 double THRandom_logNormal(double mean, double stdv)
 {
+  THRandomTLS *rstate = THRandom_getTLS();
+  return THRandom_logNormalWithState(rstate, mean, stdv);
+}
+double THRandom_logNormalWithState(THRandomTLS* rstate, double mean, double stdv)
+{
   double zm = mean*mean;
   double zs = stdv*stdv;
   THArgCheck(stdv > 0, 2, "standard deviation must be strictly positive");
-  return(exp(THRandom_normal(log(zm/sqrt(zs + zm)), sqrt(log(zs/zm+1)) )));
+  return(exp(THRandom_normalWithState(rstate, log(zm/sqrt(zs + zm)), sqrt(log(zs/zm+1)) )));
 }
 
 int THRandom_geometric(double p)
 {
+  THRandomTLS *rstate = THRandom_getTLS();
+  return THRandom_geometricWithState(rstate, p);
+}
+
+int THRandom_geometricWithState(THRandomTLS* rstate, double p)
+{
   THArgCheck(p > 0 && p < 1, 1, "must be > 0 and < 1");
-  return((int)(log(1-__uniform__()) / log(p)) + 1);
+  return((int)(log(1-__uniform__(rstate)) / log(p)) + 1);
 }
 
 int THRandom_bernoulli(double p)
 {
+  THRandomTLS *rstate = THRandom_getTLS();
+  return THRandom_bernoulliWithState(rstate, p);
+}
+
+int THRandom_bernoulliWithState(THRandomTLS* rstate, double p)
+{
   THArgCheck(p >= 0 && p <= 1, 1, "must be >= 0 and <= 1");
-  return(__uniform__() <= p);
+  return(__uniform__(rstate) <= p);
 }
 
 /* returns the random number state */
 void THRandom_getState(unsigned long *_state, long *offset, long *_left)
 {
-  if(initf == 0)
+  THRandomTLS *rstate = THRandom_getTLS();
+  if((*rstate).initf == 0)
     THRandom_seed();
-  memmove(_state, state, n*sizeof(long));
-  *offset = (long)(next - state);
-  *_left = left;
+  memmove(_state, (*rstate).state, n*sizeof(long));
+  *offset = (long)((*rstate).next - (*rstate).state);
+  *_left = (*rstate).left;
 }
 
 /* sets the random number state */
 void THRandom_setState(unsigned long *_state, long offset, long _left)
 {
-  memmove(state, _state, n*sizeof(long));
-  next = state + offset;
-  left = _left;
-  initf = 1;
+  THRandomTLS *rstate = THRandom_getTLS();
+  memmove((*rstate).state, _state, n*sizeof(long));
+  (*rstate).next = (*rstate).state + offset;
+  (*rstate).left = _left;
+  (*rstate).initf = 1;
 }
